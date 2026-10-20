@@ -166,3 +166,9 @@ def test_mid_pattern_double_star():
 def test_trailing_double_star_and_root_only_still_hold(policy):
     assert violations("manager", ["docs/superpowers/a/b/c.md"], policy) == []
     assert violations("deployer", ["sub/Dockerfile"], policy) == ["sub/Dockerfile"]
+
+
+def test_non_ascii_commit_message_is_decoded(repo):
+    base = _git(repo, "rev-parse", "HEAD")
+    _commit(repo, "tools/a.py", "feat: café Łódź\n\nRole: developer")
+    assert _run(repo, base) == 0
