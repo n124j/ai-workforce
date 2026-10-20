@@ -155,3 +155,14 @@ def test_cli_unresolvable_base_checks_all_commits(repo):
     assert _run(repo, "deadbeef" * 5) == 0
     _commit(repo, "tests/acceptance/t.py", "test: t\n\nRole: developer")
     assert _run(repo, "deadbeef" * 5) == 1
+
+
+def test_mid_pattern_double_star():
+    p = {"r": ["a/**/b"]}
+    assert violations("r", ["a/b", "a/x/b", "a/x/y/b"], p) == []
+    assert violations("r", ["a/xb", "ab"], p) == ["a/xb", "ab"]
+
+
+def test_trailing_double_star_and_root_only_still_hold(policy):
+    assert violations("manager", ["docs/superpowers/a/b/c.md"], policy) == []
+    assert violations("deployer", ["sub/Dockerfile"], policy) == ["sub/Dockerfile"]

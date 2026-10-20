@@ -28,6 +28,10 @@ def _glob_to_regex(glob: str) -> re.Pattern[str]:
     i = 0
     while i < len(glob):
         char = glob[i]
+        if glob.startswith("/**/", i):
+            out.append("(?:/|/.*/)")
+            i += 4
+            continue
         if glob.startswith("**", i):
             out.append(".*")
             i += 2
