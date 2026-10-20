@@ -26,4 +26,6 @@ End every task by appending one handoff (roles: manager, developer, tester, depl
 
     python -c "from tools.handoff_log import Handoff, append; from pathlib import Path; append(Path('workforce/status/handoffs.jsonl'), Handoff('PROJECT', 'manager', 'developer', 'one-line summary', 'submitted', '2026-10-19T12:00:00+00:00'))"
 
-Since you have no shell, add the same JSON line (keys project, from_role, to_role, summary, verdict, ts) to `workforce/status/handoffs.jsonl` with Edit, or ask the developer to run the command for you.
+You have no shell, so ask the developer (a Bash-capable role) to run an `append` command for you, giving it the exact fields. Rules for `workforce/status/handoffs.jsonl`:
+- Never edit or rewrite it directly, and never reorder or remove existing lines.
+- Always go through the validated `append`; never author tester or deployer verdicts.
