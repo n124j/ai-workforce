@@ -26,12 +26,24 @@ def test_only_workflow_dispatch_trigger(wf):
     assert names == {"workflow_dispatch"}
 
 
-def test_permissions_exactly_three(wf):
-    assert wf["permissions"] == {
-        "contents": "read",
-        "pages": "write",
-        "id-token": "write",
-    }
+def test_workflow_permissions_contents_read_only(wf):
+    assert wf["permissions"] == {"contents": "read"}
+
+
+def test_deploy_job_permissions_exactly_pages_and_id_token(wf):
+    assert wf["jobs"]["deploy"]["permissions"] == {"pages": "write", "id-token": "write"}
+
+
+def test_build_job_has_no_pages_or_id_token_permission(wf):
+    perms = wf["jobs"]["build"].get("permissions", {})
+    assert "id-token" not in perms and "pages" not in perms
+
+
+def test_checkouts_do_not_persist_credentials(wf):
+    checkouts = [s for job in wf["jobs"].values() for s in _steps(job)
+                 if s.get("uses", "").startswith("actions/checkout@")]
+    assert checkouts
+    assert all(c["with"]["persist-credentials"] is False for c in checkouts)
 
 
 def test_concurrency_group_pages_no_cancel(wf):
@@ -73,7 +85,7 @@ def test_deploy_step_uses_deploy_pages_with_id(wf):
 def test_build_npm_steps_run_in_site(wf):
     npm_steps = [s for s in _steps(wf["jobs"]["build"])
                  if s.get("run", "").startswith("npm ")]
-    assert {s["run"] for s in npm_steps} == {"npm ci", "npm run build"}
+    assert {s["run"] for s in npm_steps} == {"npm ci", "npm test", "npm run build"}
     for s in npm_steps:
         assert s.get("working-directory") == "site"
 
@@ -85,7 +97,7 @@ def test_build_uploads_site_dist(wf):
     assert ups[0]["with"]["path"] == "site/dist"
 
 
-def test_build_uses_node_20(wf):
+def test_build_uses_node_22(wf):
     setups = [s for s in _steps(wf["jobs"]["build"])
               if s.get("uses", "").startswith("actions/setup-node@")]
-    assert setups and str(setups[0]["with"]["node-version"]) == "20"
+    assert setups and str(setups[0]["with"]["node-version"]) == "22"

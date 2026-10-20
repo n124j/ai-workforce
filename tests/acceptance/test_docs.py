@@ -40,3 +40,8 @@ def test_readme_links_guide_and_design_doc():
 def test_first_handoff_recorded():
     entries = read_all(LOG)
     assert any(e.project == "foundation" for e in entries)
+
+
+@pytest.mark.parametrize("needle", ["CODEOWNERS", "merge commits", "empty", "main"])
+def test_guide_publishing_checklist_mentions(guide, needle):
+    assert needle in guide

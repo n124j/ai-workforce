@@ -92,3 +92,20 @@ def test_all_third_party_actions_pinned_to_sha(wf):
         if ref.startswith("./"):
             continue
         assert re.search(r"@[0-9a-f]{40}$", ref), f"not SHA-pinned: {ref}"
+
+
+def test_site_job_uses_node_22(wf):
+    setups = [s for s in _steps(wf["jobs"]["site"])
+              if s.get("uses", "").startswith("actions/setup-node@")]
+    assert setups and str(setups[0]["with"]["node-version"]) == "22"
+
+
+def test_checkouts_do_not_persist_credentials(wf):
+    checkouts = [s for job in wf["jobs"].values() for s in _checkouts(job)]
+    assert checkouts
+    assert all(c["with"]["persist-credentials"] is False for c in checkouts)
+
+
+def test_python_job_installs_pinned_requirements(wf):
+    runs = _runs(wf["jobs"]["python"])
+    assert "python -m pip install -r requirements-dev.txt" in runs
