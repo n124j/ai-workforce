@@ -1,0 +1,5 @@
+[roles]
+manager   = ["docs/superpowers/**", "docs/workforce.md", "workforce/status/**", "workforce/backlog/**", "workforce/policy.toml", ".claude/agents/**"]
+developer = ["tools/**", "src/**", "site/src/**", "site/package.json", "site/tsconfig.json", "site/package-lock.json", "site/vitest.config.*", ".gitattributes", "tests/unit/**", "docs/adr/**", "README.md", "pyproject.toml", ".gitignore", ".env.example", "LICENSE"]
+tester    = ["tests/acceptance/**", "evals/**", "site/tests/**"]
+deployer  = [".github/**", "docker/**", "Dockerfile*", "compose*.yaml", "terraform/**", "site/astro.config.*"]
