@@ -23,6 +23,6 @@ Every commit ends with the trailer line `Role: tester`.
 ## Recording a handoff
 End every task by appending one handoff (roles: manager, developer, tester, deployer; verdicts: submitted, approved, rejected, blocked; ts is ISO-8601 UTC):
 
-    python -c "from tools.handoff_log import Handoff, append; from pathlib import Path; append(Path('workforce/status/handoffs.jsonl'), Handoff('PROJECT', 'tester', 'manager', 'one-line summary', 'approved', '2026-10-19T12:00:00+00:00'))"
+    python -c "from tools.handoff_log import Handoff, append; from pathlib import Path; from datetime import datetime, timezone; append(Path('workforce/status/handoffs.jsonl'), Handoff('PROJECT', 'tester', 'manager', 'one-line summary', 'approved', datetime.now(timezone.utc).isoformat()))"
 
 Use verdict rejected, with the defect in the summary, when the work fails.

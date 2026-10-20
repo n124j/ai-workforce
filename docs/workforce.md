@@ -5,7 +5,7 @@
 Four Claude Code subagents, defined in `.claude/agents/`, that build the portfolio projects
 under one human director, Niraj Byanjankar. Each has its own file, its own path rules and its own
 slice of the work. Rules live in `workforce/policy.toml`; progress is recorded in
-`workforce/status/handoffs.jsonl`. Everything is free and local.
+`workforce/status/handoffs.jsonl`. Free tools only.
 
 ## The four roles
 
@@ -14,9 +14,9 @@ Paths come from `workforce/policy.toml`. A role must not touch anything outside 
 | Role | May edit | Job |
 |------|----------|-----|
 | manager | `docs/superpowers/**`, `docs/workforce.md`, `workforce/status/**`, `workforce/backlog/**`, `workforce/policy.toml`, `.claude/agents/**` | Spec, acceptance criteria, backlog, gating handoffs, escalation. Writes no product code. |
-| developer | `tools/**`, `src/**`, `site/src/**`, `site/package.json`, `site/tsconfig.json`, `site/package-lock.json`, `site/vitest.config.*`, `tests/unit/**`, `docs/adr/**`, `README.md`, `pyproject.toml`, `.gitattributes`, `.gitignore`, `.env.example`, `LICENSE` | Builds one slice at a time, with unit tests. |
-| tester | `tests/acceptance/**`, `evals/**`, `site/tests/**` | Verifies independently. Rejects broken work rather than fixing product source. |
-| deployer | `.github/**`, `docker/**`, `Dockerfile*`, `compose*.yaml`, `terraform/**`, `site/astro.config.*` | Packaging, CI, Pages, releases. |
+| developer | `tools/**`, `src/**`, `site/src/**`, `site/package.json`, `site/tsconfig.json`, `site/package-lock.json`, `site/vitest.config.*`, `tests/unit/**`, `docs/adr/**`, `README.md`, `pyproject.toml`, `.gitattributes`, `.gitignore`, `.env.example`, `LICENSE`, `site/public/**`, `tests/conftest.py`, `requirements*.txt`, `workforce/status/handoffs.jsonl` | Builds one slice at a time, with unit tests. |
+| tester | `tests/acceptance/**`, `evals/**`, `site/tests/**`, `workforce/status/handoffs.jsonl` | Verifies independently. Rejects broken work rather than fixing product source. |
+| deployer | `.github/**`, `docker/**`, `Dockerfile*`, `compose*.yaml`, `terraform/**`, `site/astro.config.*`, `.gitleaks*`, `workforce/status/handoffs.jsonl` | Packaging, CI, Pages, releases. |
 
 ## The per-project loop
 
@@ -43,6 +43,10 @@ CI runs `python -m tools.role_paths`, which fails any commit that has no `Role:`
 role may not touch one of the files in the commit.
 
 ## Dispatching an agent
+
+The manager runs as the main session (for example `claude --agent manager`), because a Claude
+Code subagent cannot spawn other subagents. The manager has no shell, so its files (policy, specs,
+this guide) are committed by a Bash-capable role or the director using `Role: manager`.
 
 In Claude Code, ask for the agent by name, for example "use the developer agent to build
 slice X", or pick it with `/agents`. Give it one small task, the acceptance criteria and the
@@ -77,6 +81,20 @@ before shipping.
 
 An agent that needs one of these records a `blocked` handoff and stops.
 
+## Publishing to GitHub (director's checklist)
+
+1. Create the GitHub repo empty: no README or license added by GitHub, because GitHub-made
+   commits carry no `Role:` line.
+2. Push to a branch named `main` (CI triggers on `main`). Local branches are `master` and
+   `foundation`, so rename or push `foundation:main` after you decide.
+3. Allow merge commits only. Disable squash and rebase merges: the role check reads one `Role:`
+   line per commit.
+4. Turn on branch protection for `main`: require the `python`, `secrets` and `site` checks and a
+   code-owner review (`.github/CODEOWNERS`).
+5. Set the Pages source to "GitHub Actions" and restrict the `github-pages` environment to `main`.
+6. Watch the first CI run, including the gitleaks job: the fake-key allowlist in `.gitleaks.toml`
+   is unverified until it runs.
+
 ## Employer rule
 
 No current or past employer IP, data, names or metrics in any project, document, test or eval.
@@ -105,7 +123,7 @@ cd site && npm ci && npm test && npm run build
   as the process around it.
 - Sign-off via `read_all` does not prove a tester approval is newer than the latest developer
   change.
-- Before the first Pages run, the director must set the repository's Pages source to "GitHub
-  Actions", and may restrict the `github-pages` environment to the main branch and add required
-  reviewers.
+- The enforcement code and CI are owned by the roles they constrain (developer owns `tools/**`,
+  deployer owns `.github/**`, manager owns the policy), so the checks are advisory unless the
+  director reviews changes to those paths via CODEOWNERS and branch protection.
 - The CI workflow (`.github/workflows/ci.yml`) has not yet run on GitHub.

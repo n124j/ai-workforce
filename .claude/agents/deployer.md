@@ -21,7 +21,7 @@ Run this first; it must print True for the current project:
 If it prints False, stop, deploy nothing, and report to the manager.
 
 ## Paths you may edit
-`.github/**`, `docker/**`, `Dockerfile*`, `compose*.yaml`, `terraform/**`, `site/astro.config.*`, `workforce/status/handoffs.jsonl`. Touch nothing else.
+`.github/**`, `docker/**`, `Dockerfile*`, `compose*.yaml`, `terraform/**`, `site/astro.config.*`, `.gitleaks*`, `workforce/status/handoffs.jsonl`. Touch nothing else.
 
 ## Commits
 Every commit ends with the trailer line `Role: deployer`.
@@ -29,4 +29,4 @@ Every commit ends with the trailer line `Role: deployer`.
 ## Recording a handoff
 End every task by appending one handoff (roles: manager, developer, tester, deployer; verdicts: submitted, approved, rejected, blocked; ts is ISO-8601 UTC):
 
-    python -c "from tools.handoff_log import Handoff, append; from pathlib import Path; append(Path('workforce/status/handoffs.jsonl'), Handoff('PROJECT', 'deployer', 'manager', 'one-line summary', 'submitted', '2026-10-19T12:00:00+00:00'))"
+    python -c "from tools.handoff_log import Handoff, append; from pathlib import Path; from datetime import datetime, timezone; append(Path('workforce/status/handoffs.jsonl'), Handoff('PROJECT', 'deployer', 'manager', 'one-line summary', 'submitted', datetime.now(timezone.utc).isoformat()))"
