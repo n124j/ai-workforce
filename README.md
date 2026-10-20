@@ -16,3 +16,9 @@ python -m venv .venv
 
 Runtime code uses the Python 3.12 standard library only. No secrets are
 committed; copy `.env.example` to `.env` for local settings.
+
+## Workforce
+
+How the four-role workforce operates (roles, loop, commit trailers, handoff log, approval
+gates) is in [docs/workforce.md](docs/workforce.md). The design behind it is in
+[docs/superpowers/specs/2026-10-19-ai-workforce-portfolio-design.md](docs/superpowers/specs/2026-10-19-ai-workforce-portfolio-design.md).
