@@ -13,7 +13,8 @@ SECRET_PATTERNS: dict[str, re.Pattern[str]] = {
 }
 
 # Design and plan documents quote fixture strings; CI's gitleaks job covers them.
-SKIP_PREFIXES = ("docs/superpowers/",)
+# The gitleaks config must quote the fake key it allowlists.
+SKIP_PREFIXES = ("docs/superpowers/", ".gitleaks.toml")
 
 SKIP_DIRS = {".git", ".superpowers", ".venv", "node_modules"}
 

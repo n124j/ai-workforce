@@ -111,3 +111,9 @@ def test_check_repo_reports_same_content_elsewhere(tmp_path):
     problems = check_repo(tmp_path)
     assert "README.md: private-key" in problems
     assert "docs/other.md: aws-access-key" in problems
+
+
+def test_gitleaks_config_is_exempt(tmp_path):
+    root = make_repo(tmp_path)
+    (root / ".gitleaks.toml").write_text("regexes = ['''" + AWS_KEY + "''']\n")
+    assert check_repo(root) == []
