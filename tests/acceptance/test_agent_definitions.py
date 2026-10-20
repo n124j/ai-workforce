@@ -63,3 +63,17 @@ def test_body_lists_every_policy_glob(role):
 def test_hard_rule_phrase(role, phrase):
     _, body = parse(role)
     assert phrase in body
+
+
+def test_manager_never_hand_edits_handoff_log():
+    _, body = parse("manager")
+    assert "never author tester or deployer verdicts" in body
+    for line in body.splitlines():
+        if "handoffs.jsonl" in line:
+            assert "with Edit" not in line and "with Write" not in line
+            assert "add the same JSON line" not in line
+
+
+def test_deployer_checks_tester_signoff_with_read_all():
+    _, body = parse("deployer")
+    assert "read_all" in body
