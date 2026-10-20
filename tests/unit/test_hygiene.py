@@ -7,7 +7,7 @@ from tools.hygiene import check_repo, find_secret_like
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Built by concatenation so this file does not trip the hygiene scan itself.
-AWS_KEY = "AKIA" + "ABCDEFGHIJKLMNOP"  # documented placeholder, allowlisted in check_repo
+AWS_KEY = "AKIA" + "ABCDEFGHIJKLMNOP"
 LEAKED_KEY = "AKIA" + "QWERTYUIOPASDFGH"
 PRIVATE_KEY_HEADER = "-----BEGIN RSA " + "PRIVATE KEY-----"
 
@@ -95,7 +95,19 @@ def test_cli_exits_one_and_prints_problems(tmp_path):
     assert "config.txt: aws-access-key" in result.stdout.splitlines()
 
 
-def test_check_repo_ignores_documented_placeholders(tmp_path):
+def test_check_repo_skips_docs_superpowers(tmp_path):
     make_repo(tmp_path)
-    (tmp_path / "plan.md").write_text(f"example: {AWS_KEY} and {PRIVATE_KEY_HEADER}\n")
+    doc = tmp_path / "docs" / "superpowers" / "plans"
+    doc.mkdir(parents=True)
+    (doc / "plan.md").write_text(f"example: {AWS_KEY}\n")
     assert check_repo(tmp_path) == []
+
+
+def test_check_repo_reports_same_content_elsewhere(tmp_path):
+    make_repo(tmp_path)
+    (tmp_path / "README.md").write_text(PRIVATE_KEY_HEADER + "\n")
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "other.md").write_text(f"{AWS_KEY}\n")
+    problems = check_repo(tmp_path)
+    assert "README.md: private-key" in problems
+    assert "docs/other.md: aws-access-key" in problems

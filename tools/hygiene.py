@@ -12,8 +12,8 @@ SECRET_PATTERNS: dict[str, re.Pattern[str]] = {
     ),
 }
 
-# Obviously fake fixtures quoted in the docs; stripped before the repo-wide scan.
-PLACEHOLDERS = ("AKIAABCDEFGHIJKLMNOP", "-----BEGIN RSA PRIVATE KEY-----")
+# Design and plan documents quote fixture strings; CI's gitleaks job covers them.
+SKIP_PREFIXES = ("docs/superpowers/",)
 
 SKIP_DIRS = {".git", ".superpowers", ".venv", "node_modules"}
 
@@ -56,11 +56,11 @@ def check_repo(root: Path) -> list[str]:
         rel = path.relative_to(root)
         if SKIP_DIRS & set(rel.parts) or not path.is_file():
             continue
+        if rel.as_posix().startswith(SKIP_PREFIXES):
+            continue
         text = _read_text(path)
         if text is None:
             continue
-        for placeholder in PLACEHOLDERS:
-            text = text.replace(placeholder, "")
         for kind in find_secret_like(text):
             problems.append(f"{rel.as_posix()}: {kind}")
     return problems
