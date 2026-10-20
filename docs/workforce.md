@@ -46,14 +46,17 @@ role may not touch one of the files in the commit.
 
 In Claude Code, ask for the agent by name, for example "use the developer agent to build
 slice X", or pick it with `/agents`. Give it one small task, the acceptance criteria and the
-project name. The manager can dispatch the others (it has the Agent tool but no shell). Each agent
-ends its task by recording a handoff.
+project name. The manager can dispatch the others (it has the Agent tool but no shell). Each role that
+has a shell records its own handoff with the validated `append`. The manager has no shell, so a
+manager-origin handoff is appended by the developer on the manager's instruction.
 
 ## Reading the handoff log
 
 `workforce/status/handoffs.jsonl` is JSONL: one JSON object per line with `project`,
 `from_role`, `to_role`, `summary`, `verdict` (`submitted`, `approved`, `rejected` or `blocked`)
-and `ts` (UTC). Never edit it by hand. Write only through the validated `append` in
+and `ts` (UTC). Never edit it by hand. Policy lets all four roles write this one file; every other file under
+`workforce/status/` is manager-only. Whoever commits a log line uses the `Role:` trailer of the
+role that did the work. Write only through the validated `append` in
 `tools/handoff_log.py`, and read it with `read_all`:
 
 ```
@@ -97,6 +100,9 @@ cd site && npm ci && npm test && npm run build
   catches a mismatch between the declared role and the files.
 - The manager role may edit `workforce/policy.toml` and `.claude/agents/**`, so any change there
   needs the director's review.
+- `from_role` in a handoff is self-declared and `append` cannot tell who actually wrote it, so
+  the developer can write an entry as the manager, and a tester sign-off is only as trustworthy
+  as the process around it.
 - Sign-off via `read_all` does not prove a tester approval is newer than the latest developer
   change.
 - Before the first Pages run, the director must set the repository's Pages source to "GitHub
