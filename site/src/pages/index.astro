@@ -1,0 +1,96 @@
+---
+import { projects } from "../data/projects";
+import { validateProjects } from "../lib/validateProjects";
+
+const errors = validateProjects(projects);
+if (errors.length > 0) {
+  throw new Error(`Invalid project data:\n${errors.join("\n")}`);
+}
+
+const statusLabels = {
+  planned: "Planned",
+  "in-progress": "In progress",
+  shipped: "Shipped",
+} as const;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Niraj Byanjankar — Principal Software Engineer</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1a1a1a;
+        --muted: #555555;
+        --link: #0b57d0;
+        --border: #d4d4d4;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #121212;
+          --fg: #ececec;
+          --muted: #a8a8a8;
+          --link: #8ab4f8;
+          --border: #3a3a3a;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+      a { color: var(--link); }
+      ul { list-style: none; padding: 0; }
+      li { border-top: 1px solid var(--border); padding: 1rem 0; }
+      .status {
+        display: inline-block;
+        margin-left: 0.5rem;
+        padding: 0 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 0.25rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .summary { margin: 0.25rem 0 0; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Niraj Byanjankar — Principal Software Engineer</h1>
+      <p>[Copy pending approval]</p>
+      <h2>Projects</h2>
+      {
+        projects.length === 0 ? (
+          <p>Projects are in progress.</p>
+        ) : (
+          <ul>
+            {projects.map((p) => (
+              <li>
+                {p.status === "shipped" ? (
+                  <a href={p.repo_url}>{p.title}</a>
+                ) : (
+                  <span>{p.title}</span>
+                )}
+                {p.status !== "shipped" && (
+                  <span class="status">{statusLabels[p.status]}</span>
+                )}
+                <p class="summary">{p.summary}</p>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </main>
+  </body>
+</html>
