@@ -1,0 +1,13 @@
+[project]
+name = "ai-workforce"
+version = "0.1.0"
+description = "Tools and portfolio site for an AI workforce"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "pyyaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
